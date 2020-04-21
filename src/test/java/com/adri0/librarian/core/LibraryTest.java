@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.*;
@@ -87,7 +88,7 @@ public class LibraryTest {
     @Test
     public void cannot_lend_nonexistent_book() {
         int nonExistentBookId = 11;
-        Assertions.assertThrows(IllegalArgumentException.class, () ->
+        Assertions.assertThrows(NoSuchElementException.class, () ->
             libraryWith10Books.lendBook(nonExistentBookId, alicja));
     }
 

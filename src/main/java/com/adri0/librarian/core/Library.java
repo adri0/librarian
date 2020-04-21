@@ -63,9 +63,7 @@ public class Library {
      */
     public void removeBook(int bookId) {
         assertBookExists(bookId);
-        if (currentLendings.containsKey(bookId)) {
-            throw new IllegalStateException("cannot remove a book that has been lent");
-        }
+        assertBookNotLent(bookId, "cannot remove a book that has been lent");
         allBooks.remove(bookId);
     }
 
@@ -74,6 +72,13 @@ public class Library {
      */
     public Book getBook(int bookId) {
         return allBooks.get(bookId);
+    }
+
+    /**
+     * Check whether a book with the provided id exists in the library.
+     */
+    public boolean containsBook(int bookId) {
+        return allBooks.get(bookId) == null;
     }
 
     /**
@@ -89,16 +94,14 @@ public class Library {
 
     /**
      * Lends a book by providing its bookId and a user.
-     * If the book doesn't exist it will throw an IllegalArgumentException.
+     * If the book doesn't exist it will throw an NoSuchElementException.
      * If the book has been lent, throws an IllegalStateException.
      * Returns a Lending instance providing details of the lending.
      * Adds the Lending instance to the currentLendings map.
      */
     public Lending lendBook(int bookId, User user) {
         assertBookExists(bookId);
-        if (currentLendings.containsKey(bookId)) {
-            throw new IllegalStateException("cannot lend a book that has been lent");
-        }
+        assertBookNotLent(bookId, "cannot lend a book that has been lent");
         Book book = allBooks.get(bookId);
         Lending lending = new Lending(book, user);
         book.setLending(lending);
@@ -113,9 +116,8 @@ public class Library {
      * and removed from currentLendings map.
      */
     public void returnBook(int bookId) {
-        if (!currentLendings.containsKey(bookId)) {
-            throw new IllegalStateException("cannot return a book that hasn't been lent");
-        }
+        assertBookExists(bookId);
+        assertBookLent(bookId, "cannot return a book that hasn't been lent");
         Lending lending = currentLendings.get(bookId);
         lending.finish();
         currentLendings.remove(bookId);
@@ -165,7 +167,19 @@ public class Library {
 
     private void assertBookExists(int bookId) {
         if (!allBooks.containsKey(bookId)) {
-            throw new IllegalArgumentException("book with id " + bookId + " doesn't exist");
+            throw new NoSuchElementException("book with id " + bookId + " doesn't exist in the library");
+        }
+    }
+
+    private void assertBookLent(int bookId, String message) {
+        if (!currentLendings.containsKey(bookId)) {
+            throw new IllegalStateException(message + ": " + bookId);
+        }
+    }
+
+    private void assertBookNotLent(int bookId, String message) {
+        if (currentLendings.containsKey(bookId)) {
+            throw new IllegalStateException(message + ": " + bookId);
         }
     }
 
